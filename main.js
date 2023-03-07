@@ -27,11 +27,13 @@ const loader = new GLTFLoader();
 loader.load(
   "Object.glb",
   (glb) => {
-    console.log(glb);
     scene.add(glb.scene);
   },
   (xhr) => {
-    console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+    console.log(
+      (xhr.loaded / xhr.total) * 100 < 100 &&
+        (xhr.loaded / xhr.total) * 100 + "% loaded"
+    );
   },
   (error) => {
     console.log("An error happened", error);
@@ -45,9 +47,20 @@ let rotationCount = 0;
 let clicked = false;
 
 const onClick = (event) => {
-  event.preventDefault();
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  const isTouch = event.type === "touchstart";
+
+  if (isTouch) {
+    const touch = event.changedTouches[0];
+    mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+  }
+
+  if (!isTouch) {
+    event.preventDefault();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  }
+
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObjects(scene.children, true);
 
@@ -60,7 +73,6 @@ const onClick = (event) => {
 
   if (merged.length > 0) {
     if (rotationCount === 0 && !clicked) {
-      console.log("clicked");
       clicked = true;
       rotate(merged[0]);
       merged[0].children[0].material.color.set("red");
@@ -73,7 +85,6 @@ const rotate = (obj) => {
   const degrees = (obj.rotation.x * 180) / Math.PI;
 
   if (degrees >= 360) {
-    console.log("one rotation completed");
     rotationCount++;
     obj.rotation.x = 0;
   }
@@ -87,6 +98,7 @@ const rotate = (obj) => {
 };
 
 window.addEventListener("click", onClick, false);
+window.addEventListener("touchstart", onClick, false);
 
 const colorLight = new THREE.Color("#F2F2F2");
 
