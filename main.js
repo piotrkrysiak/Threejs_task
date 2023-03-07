@@ -3,12 +3,12 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { handleResize, zoomCamera } from "./helpers";
 
-const render = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 
-render.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth, window.innerHeight);
 
 const app = document.getElementById("app");
-app && app.appendChild(render.domElement);
+app && app.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 
@@ -20,7 +20,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.z = 10;
 
-const orbitControls = new OrbitControls(camera, render.domElement);
+const orbitControls = new OrbitControls(camera, renderer.domElement);
 orbitControls.update();
 
 const loader = new GLTFLoader();
@@ -75,7 +75,7 @@ const onClick = (event) => {
     if (rotationCount === 0 && !clicked) {
       clicked = true;
       rotate(merged[0]);
-      merged[0].children[0].material.color.set("red");
+      merged[0]?.children[0].material.color.set("red");
     }
   }
 };
@@ -90,8 +90,11 @@ const rotate = (obj) => {
   }
 
   if (rotationCount >= 1) {
-    clicked = false;
     rotationCount = 0;
+    setTimeout(() => {
+      obj.children[0].material.color.set("white");
+      clicked = false;
+    }, 200);
     return;
   }
   requestAnimationFrame(() => rotate(obj));
@@ -108,17 +111,24 @@ light.position.set(2, 2, 5);
 const pointLight = new THREE.PointLight(colorLight, 2);
 pointLight.position.set(-4, 2, 5);
 
-scene.add(light, pointLight);
+const pointLight2 = new THREE.PointLight(colorLight, 2);
+pointLight2.position.set(2, 2, -5);
+
+scene.add(light, pointLight, pointLight2);
 
 const animate = () => {
   requestAnimationFrame(animate);
-  render.render(scene, camera);
+  render();
 };
 
-render.setAnimationLoop(animate);
+const render = () => {
+  renderer.render(scene, camera);
+};
+
+animate();
 
 zoomCamera(camera, 5, 1000);
 
 window.addEventListener("resize", () => {
-  handleResize(render, camera);
+  handleResize(renderer, camera);
 });
