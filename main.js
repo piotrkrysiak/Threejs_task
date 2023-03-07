@@ -25,7 +25,7 @@ orbitControls.update();
 
 const loader = new GLTFLoader();
 loader.load(
-  "assets/Object.glb",
+  "Object.glb",
   (glb) => {
     console.log(glb);
     scene.add(glb.scene);
