@@ -1,8 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { handleResize, zoomCamera } from "./helpers";
 
-const render = new THREE.WebGLRenderer();
+const render = new THREE.WebGLRenderer({ antialias: true });
 
 render.setSize(window.innerWidth, window.innerHeight);
 
@@ -103,3 +104,9 @@ const animate = () => {
 };
 
 render.setAnimationLoop(animate);
+
+zoomCamera(camera, 5, 1000);
+
+window.addEventListener("resize", () => {
+  handleResize(render, camera);
+});
