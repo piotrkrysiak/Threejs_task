@@ -37,6 +37,56 @@ loader.load(
   }
 );
 
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+let rotationCount = 0;
+let clicked = false;
+
+const onClick = (event) => {
+  event.preventDefault();
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(scene.children, true);
+
+  const merged = [];
+  for (let i = 0; i < intersects.length; i++) {
+    if (intersects[i].object.parent) {
+      merged.push(intersects[i].object.parent);
+    }
+  }
+
+  if (merged.length > 0) {
+    if (rotationCount === 0 && !clicked) {
+      console.log("clicked");
+      clicked = true;
+      rotate(merged[0]);
+      merged[0].children[0].material.color.set("red");
+    }
+  }
+};
+
+const rotate = (obj) => {
+  obj.rotation.x += 0.1;
+  const degrees = (obj.rotation.x * 180) / Math.PI;
+
+  if (degrees >= 360) {
+    console.log("one rotation completed");
+    rotationCount++;
+    obj.rotation.x = 0;
+  }
+
+  if (rotationCount >= 1) {
+    clicked = false;
+    rotationCount = 0;
+    return;
+  }
+  requestAnimationFrame(() => rotate(obj));
+};
+
+window.addEventListener("click", onClick, false);
+
 const colorLight = new THREE.Color("#F2F2F2");
 
 const light = new THREE.DirectionalLight(colorLight, 3);
